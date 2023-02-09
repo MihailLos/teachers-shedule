@@ -38,10 +38,10 @@ function App() {
           </thead>
           <tbody>
             {weekDayList.map((weekDay) => {
-              return weekTypeList.map((weekType) => {
+              return weekTypeList.map((weekType, idx) => {
                 return (
                   <tr>
-                    <td>{weekDay.name}</td>
+                    {idx % 2 == 0 ? <td rowSpan={2}>{weekDay.name}</td> : null}
                     <td>{weekType.name}</td>
                     {coupleList.map((couple) => {
                       return (
