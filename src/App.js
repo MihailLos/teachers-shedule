@@ -1,12 +1,8 @@
 import "./bootstrap.css";
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 function App() {
-  return (
-    <Fragment>
-      <SemesterDropDown />
-    </Fragment>
-  );
+  return <SemesterDropDown />;
 }
 
 function SemesterDropDown() {
@@ -18,7 +14,9 @@ function SemesterDropDown() {
 
   const onChangeDropdown = (event) => {
     event.target.value ? setShowTeachers(true) : setShowTeachers(false);
-    setChosenSemester(event.target.value);
+    setChosenSemester(
+      semesterList.find((element) => element.Id === Number(event.target.value))
+    );
   };
 
   useEffect(() => {
@@ -27,7 +25,7 @@ function SemesterDropDown() {
       .then((res) => {
         setList(res.result);
       });
-  });
+  }, []);
 
   return (
     <div>
@@ -40,15 +38,21 @@ function SemesterDropDown() {
           Выберите семестр
         </option>
         {semesterList.map((semester) => {
-          return <option value={semester.Id}>{semester.Title}</option>;
+          return (
+            <option key={semester.Id} value={semester.Id}>
+              {semester.Title}
+            </option>
+          );
         })}
       </select>
-      {showTeachers ? <TeacherDropDown semId={chosenSemester} /> : null}
+      {showTeachers ? <TeacherDropDown semId={chosenSemester.Id} /> : null}
     </div>
   );
 }
 
 function TeacherDropDown(props) {
+  let accessToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwiaXAiOiIxNzYuMTk2LjE2LjE4MCIsInVzZXJJZCI6MTcwMzAsImlhdCI6MTY3NzE0NDYzMiwiZXhwIjoxNjc3MjMxMDMyfQ.7ktfo44A4tBJJc1Upl4z_n9lnm93uEeaZ3CFLZXXOpg";
   let [teachersList, setList] = useState([]);
 
   let [chosenTeacher, setChosenTeacher] = useState(null);
@@ -57,7 +61,12 @@ function TeacherDropDown(props) {
 
   const onChangeDropdown = (event) => {
     event.target.value ? setShowTable(true) : setShowTable(false);
-    setChosenTeacher(event.target.value);
+    console.log(teachersList);
+    setChosenTeacher(
+      teachersList.find(
+        (element) => element.prepId === Number(event.target.value)
+      )
+    );
   };
 
   useEffect(() => {
@@ -65,8 +74,7 @@ function TeacherDropDown(props) {
       `https://api-next.kemsu.ru/api/schedule/integration/teacherList?semesterId=${props.semId}`,
       {
         headers: {
-          "X-Access-Token":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwiaXAiOiIxNzYuMTk2LjE2LjE4MCIsInVzZXJJZCI6MTcwMzAsImlhdCI6MTY3Njk5NDMwOSwiZXhwIjoxNjc3MDgwNzA5fQ.8yzfwFql9zdeD_Hf6PiPRvaLmenwgTQiwgOmEXGi6IE",
+          "X-Access-Token": accessToken,
         },
       }
     )
@@ -74,7 +82,7 @@ function TeacherDropDown(props) {
       .then((res) => {
         setList(res.teacherList);
       });
-  });
+  }, [props.semId]);
 
   return (
     <div>
@@ -87,10 +95,14 @@ function TeacherDropDown(props) {
           Выберите преподавателя
         </option>
         {teachersList.map((teacher) => {
-          return <option value={teacher.fio}>{teacher.fio}</option>;
+          return (
+            <option key={teacher.prepId} value={teacher.prepId}>
+              {teacher.fio}
+            </option>
+          );
         })}
       </select>
-      {showTable ? <SheduleTable teacherFio={chosenTeacher} /> : null}
+      {showTable ? <SheduleTable teacherFio={chosenTeacher.fio} /> : null}
     </div>
   );
 }
@@ -113,7 +125,7 @@ function SheduleTable(props) {
       .then((res) => {
         setCoupleList(res.coupleList);
       });
-  });
+  }, []);
 
   return (
     <div>
@@ -141,6 +153,9 @@ function SheduleTable(props) {
                         <label>
                           <input
                             type={"checkbox"}
+                            // onChange={(event) => {
+                            //   onChange_2(weekId, coo);
+                            // }}
                             className="form-check-input"
                           />
                           &nbsp; Не выставлять
